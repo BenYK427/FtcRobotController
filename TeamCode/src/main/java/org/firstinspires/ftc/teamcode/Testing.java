@@ -1,23 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
-public class Testing extends OpMode{
+import org.firstinspires.ftc.teamcode.mechanisms.DcMotorTest;
 
-    @Override
+@Disabled
+public class Testing extends  OpMode{
+    DcMotorTest motor = new DcMotorTest();
+
     public void init(){
+        motor.init(hardwareMap);
 
-
-
-        telemetry.addData("hello", "world");
     }
 
     @Override
-    public void loop(){
-
-
-
+    public void loop() {
+        motor.setIntakeMotorSpeed(0.5);
+        motor.setMotorFlywheelSpeed(0.2);
     }
 }
