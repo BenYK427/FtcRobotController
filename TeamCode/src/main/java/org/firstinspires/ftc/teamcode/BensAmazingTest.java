@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.mechanisms.Flywheel;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanumDrive;
 
@@ -13,19 +19,37 @@ public class BensAmazingTest extends OpMode{
     double forward, strafe, turn;
     boolean adjust;
 
-    Intake intakeMotorPower = new Intake();
+    Intake intake = new Intake();
     double intakePower;
+
+    Flywheel flywheel = new Flywheel();
+    double distance;
+    boolean autoFlywheel;
+
+    GoBildaPinpointDriver odo;
+
 
     public void init(){
         drive.init(hardwareMap);
-        intakeMotorPower.init(hardwareMap);
+        intake.init(hardwareMap);
+        flywheel.init(hardwareMap);
+
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+
+        odo.resetPosAndIMU();
+        Pose2D startingPosition = new Pose2D(DistanceUnit.MM, 100, 100, AngleUnit.RADIANS, 0);
+        odo.setPosition(startingPosition);
+
         telemetry.addLine("init complete");
 
     }
 
     @Override
     public void loop() {
+        //-----------------------Odometry---------------------------
+        double heading = odo.getHeading(UnnormalizedAngleUnit.RADIANS);
 
+        double x = odo.getPosX(DistanceUnit.MM);
 
         //---------------------------Drive------------------------------
         if(gamepad1.b){
@@ -41,13 +65,33 @@ public class BensAmazingTest extends OpMode{
         drive.drive(forward, strafe, turn, adjust);
 
 
-        //--------------------------Intake--------------------
+        //-----------------------Intake-------------------------
+        intakePower = gamepad2.left_stick_y;
 
-        intakePower = gamepad1.left_stick_y;
+        intake.intake(intakePower);
 
-        intakeMotorPower.IntakeMotorPower(intakePower);
+        //-----------------------Turret-------------------------
 
+        //----------------------Flywheel------------------------
+        distance = 1500;
 
+        if(gamepad2.rightBumperWasPressed()){
+            if(autoFlywheel = false){
+                autoFlywheel = true;
+            } else if(autoFlywheel = true){
+                autoFlywheel = false;
+            }
 
+        }
+
+        flywheel.flywheel(distance, autoFlywheel);
+
+        //--------------------Telemetry-------------------------
+
+        telemetry.addData("heading", heading);
+        telemetry.addData("x", x);
+        telemetry.update();
+
+        odo.update();
     }
 }

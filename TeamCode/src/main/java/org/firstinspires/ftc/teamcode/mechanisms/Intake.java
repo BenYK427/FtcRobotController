@@ -13,7 +13,7 @@ public class Intake {
         intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
-    public void IntakeMotorPower(double intakePower) {
-        intakeMotor.setPower(intakePower);
+    public void intake(double intakePower) {
+        intakeMotor.setPower(-intakePower);
     }
 }

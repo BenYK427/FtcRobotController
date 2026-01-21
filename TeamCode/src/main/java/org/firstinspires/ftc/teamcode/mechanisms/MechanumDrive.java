@@ -9,9 +9,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MechanumDrive {
-
-
-
     private DcMotor RightFront, RightBack, LeftFront, LeftBack;
 
     private IMU imu;
@@ -51,25 +48,6 @@ public class MechanumDrive {
 
 
     public void drive(double forward, double strafe, double turn, boolean adjust){
-
-
-//        double frontLeftPower = forward + strafe + turn;
-//        double backLeftPower = forward - strafe + turn;
-//        double frontRightPower = forward - strafe - turn;
-//        double backRightPower = forward + strafe - turn;
-//
-//        double maxPower = 1;
-//        double maxSpeed = 1;
-//
-//        maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
-//        maxPower = Math.max(maxPower, Math.abs(backLeftPower));
-//        maxPower = Math.max(maxPower, Math.abs(frontRightPower));
-//        maxPower = Math.max(maxPower, Math.abs(backRightPower));
-//
-//        LeftFront.setPower(maxSpeed*(frontLeftPower / maxPower));
-//        LeftBack.setPower(maxSpeed*(backLeftPower / maxPower));
-//        RightFront.setPower(maxSpeed*(frontRightPower / maxPower));
-//        RightBack.setPower(maxSpeed*(backRightPower / maxPower));
 
         double r = Math.sqrt(strafe*strafe+forward*forward);
         double theda = Math.atan2(forward, strafe);
