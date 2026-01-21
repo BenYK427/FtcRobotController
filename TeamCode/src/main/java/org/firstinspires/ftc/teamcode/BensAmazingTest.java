@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -22,9 +26,9 @@ public class BensAmazingTest extends OpMode{
     Intake intake = new Intake();
     double intakePower;
 
-    Flywheel flywheel = new Flywheel();
-    double distance;
-    boolean autoFlywheel;
+//    Flywheel flywheel = new Flywheel();
+//    double distance;
+//    boolean autoFlywheel;
 
     GoBildaPinpointDriver odo;
 
@@ -32,7 +36,7 @@ public class BensAmazingTest extends OpMode{
     public void init(){
         drive.init(hardwareMap);
         intake.init(hardwareMap);
-        flywheel.init(hardwareMap);
+        //flywheel.init(hardwareMap);
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
@@ -73,23 +77,19 @@ public class BensAmazingTest extends OpMode{
         //-----------------------Turret-------------------------
 
         //----------------------Flywheel------------------------
-        distance = 1500;
-
-        if(gamepad2.rightBumperWasPressed()){
-            if(autoFlywheel = false){
-                autoFlywheel = true;
-            } else if(autoFlywheel = true){
-                autoFlywheel = false;
-            }
-
-        }
-
-        flywheel.flywheel(distance, autoFlywheel);
+//        distance = 1500;
+//
+//        if(gamepad2.rightBumperWasPressed()){
+//            autoFlywheel = !autoFlywheel;
+//        }
+//
+//        flywheel.flywheel(distance, autoFlywheel);
 
         //--------------------Telemetry-------------------------
 
         telemetry.addData("heading", heading);
         telemetry.addData("x", x);
+        //telemetry.addData("status", autoFlywheel);
         telemetry.update();
 
         odo.update();

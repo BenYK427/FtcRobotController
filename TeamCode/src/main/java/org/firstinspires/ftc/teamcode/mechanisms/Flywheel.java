@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Flywheel {
 
@@ -28,6 +29,9 @@ public class Flywheel {
         if(autoFlywheel){
             motorFlywheel.setVelocity(1500);
             motorFlywheel2.setPower(motorFlywheel.getPower());
+        } else {
+            motorFlywheel.setPower(0);
+            motorFlywheel2.setPower(0);
         }
 
     }
