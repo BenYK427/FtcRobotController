@@ -34,29 +34,37 @@ public class BensAmazingTest extends OpMode{
     double distance;
     boolean autoFlywheel;
 
-    Turret turret = new Turret();
-
+    //Turret turret = new Turret();
     double turretPower;
+    double turretPos;
+    //private DcMotor turretMotor;
     GoBildaPinpointDriver odo;
 
     private Limelight3A limelight;
 
 
-    //private DcMotor turretMotor;
+    private DcMotor turretMotor;
     double i;
     double d;
+    double error;
     double lastError;
     double PID;
     double txpmo;
+    double targetPos = 0;
 
 
     public void init(){
         drive.init(hardwareMap);
         intake.init(hardwareMap);
         flywheel.init(hardwareMap);
-        turret.init(hardwareMap);
+        //turret.init(hardwareMap);
 
-        //turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+        turretMotor = hardwareMap.get(DcMotor.class, "turretMotor");
+
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
@@ -113,48 +121,79 @@ public class BensAmazingTest extends OpMode{
         intake.intake(intakePower);
 
         //-----------------------Turret-------------------------
-        if(gamepad2.b){
-            txpmo = 0;
-            turretPower = gamepad2.right_stick_x;
+
+
+
+        if(gamepad2.dpadUpWasPressed()){
+            targetPos += 100;
+        }
+        if(gamepad2.dpadDownWasPressed()){
+            targetPos -= 100;
         }
 
-        i = i + tx;
-        d = tx - lastError;
-        lastError = tx;
-        //p:0.45 i:0.022 d:0.5
+        targetPos = heading*800/3.14159;
 
-            PID = tx * 1 + i * 0.05 + d * 0;
-            PID = PID * 0.05 + 0.1;
+        error = turretMotor.getCurrentPosition() - targetPos;
+        i = i + error;
+        if(Math.abs(error) > 10){
+            i = 0;
+        }
+        d = error - lastError;
+        lastError = error;
+        //p:0.45 i:0.05 d:0.5
 
+        PID = error * 1 + i * 0.05 + d * 0.05;
+        PID = PID*0.007;
 
-        if(tx == 0 && lastError == 0){
+        if(PID > 0.6){
+            PID = 0.6;
+        }
+
+        if(PID < -0.6){
+            PID = -0.6;
+        }
+
+        if(Math.abs(error) < 5){
             PID = 0;
         }
 
-        if(PID > 0.4){
-            PID = 0.4;
+//        if(PID > 0.4){
+//            PID = 0.4;
+//        }
+//
+//        if(PID < -0.4){
+//            PID = -0.4;
+//        }
+
+        if(gamepad2.b){
+            PID = 0;
         }
 
 
-        turret.turret(PID, turretPower);
+        turretMotor.setPower(-PID);
+
+
+        //turretMotor.setPower(PID + turretPower);
+
+
+        //turret.turret(turretPower);
         //----------------------Flywheel------------------------
-        distance = 200;
+        distance = 2000;
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
         }
 
-
-
         flywheel.flywheel(distance, autoFlywheel);
 
         //--------------------Telemetry-------------------------
 
-        telemetry.addData("heading", heading);
+        telemetry.addData("heading", heading*800/3.14159);
         telemetry.addData("x", x);
         //telemetry.addData("status", autoFlywheel);
         telemetry.addData("tx", tx);
-        telemetry.addData("turret Power", PID);
+        telemetry.addData("turret Power", turretMotor.getPower());
+        telemetry.addData("turretPos", turretMotor.getCurrentPosition());
         telemetry.update();
 
         odo.update();
