@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -36,11 +38,13 @@ public class BensAmazingTest extends OpMode{
 
     //Turret turret = new Turret();
     double turretPower;
-    double turretPos;
+
     //private DcMotor turretMotor;
     GoBildaPinpointDriver odo;
 
     private Limelight3A limelight;
+
+    double tx;
 
 
     private DcMotor turretMotor;
@@ -51,6 +55,9 @@ public class BensAmazingTest extends OpMode{
     double PID;
     double txpmo;
     double targetPos = 0;
+    double lllocalize = 0;
+    double turretAnchor = 0;
+    boolean search = false;
 
 
     public void init(){
@@ -96,7 +103,10 @@ public class BensAmazingTest extends OpMode{
         LLResult llResult = limelight.getLatestResult();
 
         Pose3D botPose = llResult.getBotpose();
-        double tx = llResult.getTx();
+
+        tx = llResult.getTx()*5.4166667;
+
+
 
 
 
@@ -125,13 +135,43 @@ public class BensAmazingTest extends OpMode{
 
 
         if(gamepad2.dpadUpWasPressed()){
-            targetPos += 100;
+            turretAnchor += 1;
         }
         if(gamepad2.dpadDownWasPressed()){
-            targetPos -= 100;
+            turretAnchor -= 1;
         }
 
-        targetPos = heading*800/3.14159;
+        if(gamepad2.bWasPressed()){
+            search = true;
+        }
+
+        if(tx != 0){
+
+            if(Math.abs(error) < 40){
+                lllocalize += error + tx;
+                search = false;
+            }
+
+
+
+            if(Math.abs(tx) < 100 && gamepad2.right_stick_x != 0){
+                turretAnchor = turretMotor.getCurrentPosition() - heading;
+            }
+
+            if(gamepad2.a){
+                turretAnchor = turretMotor.getCurrentPosition() - heading;
+                lllocalize += error + tx;
+            }
+        }
+
+
+
+
+        if(gamepad2.b){
+            targetPos = heading*800/3.14159 + turretAnchor + lllocalize;
+        } else {
+            targetPos = 0;
+        }
 
         error = turretMotor.getCurrentPosition() - targetPos;
         i = i + error;
@@ -140,10 +180,10 @@ public class BensAmazingTest extends OpMode{
         }
         d = error - lastError;
         lastError = error;
-        //p:0.45 i:0.05 d:0.5
+        //p:1 i:0.05 d:0.05
 
         PID = error * 1 + i * 0.05 + d * 0.05;
-        PID = PID*0.007;
+        PID = PID*0.005;
 
         if(PID > 0.6){
             PID = 0.6;
@@ -153,30 +193,26 @@ public class BensAmazingTest extends OpMode{
             PID = -0.6;
         }
 
-        if(Math.abs(error) < 5){
+        if(Math.abs(error) < 80){
+            if(PID > 0.2){
+                PID = 0.2;
+            }
+
+            if(PID < -0.2){
+                PID = -0.2;
+            }
+        }
+
+        if(Math.abs(error) < 1){
             PID = 0;
         }
 
-//        if(PID > 0.4){
-//            PID = 0.4;
-//        }
-//
-//        if(PID < -0.4){
-//            PID = -0.4;
-//        }
-
-        if(gamepad2.b){
-            PID = 0;
+        if(gamepad2.right_stick_x != 0){
+            PID = gamepad2.right_stick_x*0.5;
         }
 
 
         turretMotor.setPower(-PID);
-
-
-        //turretMotor.setPower(PID + turretPower);
-
-
-        //turret.turret(turretPower);
         //----------------------Flywheel------------------------
         distance = 2000;
 
@@ -192,7 +228,10 @@ public class BensAmazingTest extends OpMode{
         telemetry.addData("x", x);
         //telemetry.addData("status", autoFlywheel);
         telemetry.addData("tx", tx);
+        telemetry.addData("error", error);
         telemetry.addData("turret Power", turretMotor.getPower());
+        telemetry.addData("targpos", targetPos);
+        telemetry.addData("anchor", turretAnchor);
         telemetry.addData("turretPos", turretMotor.getCurrentPosition());
         telemetry.update();
 
