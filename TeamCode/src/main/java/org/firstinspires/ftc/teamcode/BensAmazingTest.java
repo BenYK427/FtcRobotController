@@ -26,14 +26,14 @@ import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 public class BensAmazingTest extends OpMode{
 
     MechanumDrive drive = new MechanumDrive();
-    double forward, strafe, turn;
-    boolean adjust;
+    double forward, strafe, turn, headingDrive;
+    boolean adjust = false;
 
     Intake intake = new Intake();
     double intakePower;
 
     Flywheel flywheel = new Flywheel();
-    double distance;
+    double distance = 1800;
     boolean autoFlywheel;
 
     //Turret turret = new Turret();
@@ -60,7 +60,7 @@ public class BensAmazingTest extends OpMode{
     double zeroAdjust = 0;
     double headingNormShift = 0;
     double headingNormShiftVal = 0;
-    boolean adjusted = false;
+    boolean adjustedTur = false;
 
 
     public void init(){
@@ -86,13 +86,13 @@ public class BensAmazingTest extends OpMode{
         limelight.pipelineSwitch(0);
 
         telemetry.addLine("init complete");
-        adjusted = false;
+        adjustedTur = false;
 
     }
 
     public void start(){
         limelight.start();
-        adjusted = false;
+        adjustedTur = false;
     }
 
     @Override
@@ -111,12 +111,7 @@ public class BensAmazingTest extends OpMode{
 
         tx = llResult.getTx()*5.4166667;
 
-        if(gamepad1.dpadUpWasPressed()){
-            headingNormShiftVal += 100;
-        }
-        if(gamepad1.dpadDownWasPressed()){
-            headingNormShiftVal -= 100;
-        }
+
 
         if(headingNormShiftVal > 0) {
             if (headingNorm + headingNormShiftVal > 800) {
@@ -133,7 +128,7 @@ public class BensAmazingTest extends OpMode{
             }
         }
 
-        if(adjusted == false){
+        if(adjustedTur == false){
             headingNormShift = headingNorm;
         }
 
@@ -150,7 +145,9 @@ public class BensAmazingTest extends OpMode{
         strafe = gamepad1.left_stick_x*-1.1;
         turn = gamepad1.right_stick_x*-0.4;
 
-        drive.drive(forward, strafe, turn, adjust);
+        headingDrive = odo.getHeading(AngleUnit.RADIANS);
+
+        drive.drive(forward, strafe, turn, adjust, headingDrive);
 
 
         //-----------------------Intake-------------------------
@@ -186,17 +183,17 @@ public class BensAmazingTest extends OpMode{
             }
         }
 
-        if(Math.abs(error) < 20 && adjusted == false && tx != 0){
+        if(Math.abs(error) < 20 && adjustedTur == false && tx != 0){
             headingNormShiftVal = turretMotor.getCurrentPosition();
-            adjusted = true;
+            adjustedTur = true;
             turretAnchor = 0;
         }
 
-        if(gamepad2.b){
-            targetPos = headingNorm + turretAnchor + 0*lllocalize + zeroAdjust;
-        } else {
-            targetPos = 0 + zeroAdjust;
-        }
+//        if(gamepad2.b){
+//            targetPos = headingNorm + turretAnchor + 0*lllocalize + zeroAdjust;
+//        } else {
+//            targetPos = 0 + zeroAdjust;
+//        }
         targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
 
         error = turretMotor.getCurrentPosition() - targetPos;
@@ -246,7 +243,13 @@ public class BensAmazingTest extends OpMode{
 //            turretMotor.setPower(0);
 //        }
         //----------------------Flywheel------------------------
-        distance = 2000;
+        if(gamepad1.dpadUpWasPressed()){
+            distance += 10;
+        }
+
+        if(gamepad1.dpadDownWasPressed()){
+            distance -= 10;
+        }
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
@@ -259,8 +262,10 @@ public class BensAmazingTest extends OpMode{
         telemetry.addData("heading", headingNorm);
         telemetry.addData("headingshift", headingNormShift);
         telemetry.addData("shiftval", headingNormShiftVal);
-        telemetry.addData("adj", adjusted);
+        telemetry.addData("adj", adjustedTur);
+        telemetry.addData("distance", distance);
         telemetry.addData("tx", tx);
+        telemetry.addData("ta", llResult.getTa());
         telemetry.addData("error", error);
         telemetry.addData("lllocalize", lllocalize);
         telemetry.addData("turret Power", turretMotor.getPower());

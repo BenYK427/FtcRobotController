@@ -26,7 +26,7 @@ public class Flywheel {
         motorFlywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motorFlywheel2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(100, 0, 0, 12.3);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 12.3);
         motorFlywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 

@@ -41,26 +41,24 @@ public class MechanumDrive {
     }
 
 
-    public double getHeading(){
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-    }
 
 
 
-    public void drive(double forward, double strafe, double turn, boolean adjust){
+
+    public void drive(double forward, double strafe, double turn, boolean adjust, double headingDrive){
 
         double r = Math.sqrt(strafe*strafe+forward*forward);
         double theda = Math.atan2(forward, strafe);
         double headingPositive;
         //adjustment mid match:
         if(adjust){
-            adjustment = getHeading();
+            adjustment = headingDrive;
         }
         //apply rotation:
-        if(getHeading() < 0){
-            headingPositive = getHeading()+2*3.14159;
+        if(headingDrive < 0){
+            headingPositive = headingDrive+2*3.14159;
         } else {
-            headingPositive = getHeading();
+            headingPositive = headingDrive;
         }
         theda = theda - headingPositive + adjustment;
         //convert back to cartisain:
