@@ -57,7 +57,10 @@ public class BensAmazingTest extends OpMode{
     double targetPos = 0;
     double lllocalize = 0;
     double turretAnchor = 0;
-    boolean search = false;
+    double zeroAdjust = 0;
+    double headingNormShift = 0;
+    double headingNormShiftVal = 0;
+    boolean adjusted = false;
 
 
     public void init(){
@@ -83,18 +86,20 @@ public class BensAmazingTest extends OpMode{
         limelight.pipelineSwitch(0);
 
         telemetry.addLine("init complete");
+        adjusted = false;
 
     }
 
     public void start(){
         limelight.start();
+        adjusted = false;
     }
 
     @Override
     public void loop() {
         //-----------------------Odometry---------------------------
         double heading = odo.getHeading(UnnormalizedAngleUnit.RADIANS);
-        double headingNorm = odo.getHeading(AngleUnit.RADIANS);
+        double headingNorm = odo.getHeading(AngleUnit.RADIANS)*800/3.14159;
 
         double x = odo.getPosX(DistanceUnit.MM);
 
@@ -106,8 +111,31 @@ public class BensAmazingTest extends OpMode{
 
         tx = llResult.getTx()*5.4166667;
 
+        if(gamepad1.dpadUpWasPressed()){
+            headingNormShiftVal += 100;
+        }
+        if(gamepad1.dpadDownWasPressed()){
+            headingNormShiftVal -= 100;
+        }
 
+        if(headingNormShiftVal > 0) {
+            if (headingNorm + headingNormShiftVal > 800) {
+                headingNormShift = headingNorm - (1600 - headingNormShiftVal);
+            } else {
+                headingNormShift = headingNorm + headingNormShiftVal;
+            }
+        }
+        if(headingNormShiftVal < 0) {
+            if (headingNorm + headingNormShiftVal < -800) {
+                headingNormShift = headingNorm + 1600 + headingNormShiftVal;
+            } else {
+                headingNormShift = headingNorm + headingNormShiftVal;
+            }
+        }
 
+        if(adjusted == false){
+            headingNormShift = headingNorm;
+        }
 
 
 
@@ -135,43 +163,41 @@ public class BensAmazingTest extends OpMode{
 
 
         if(gamepad2.dpadUpWasPressed()){
-            turretAnchor += 1;
+            zeroAdjust += 10;
         }
         if(gamepad2.dpadDownWasPressed()){
-            turretAnchor -= 1;
-        }
-
-        if(gamepad2.bWasPressed()){
-            search = true;
+            zeroAdjust -= 10;
         }
 
         if(tx != 0){
 
-            if(Math.abs(error) < 40){
+            if(Math.abs(error + tx ) > 30 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500){
                 lllocalize += error + tx;
-                search = false;
             }
-
 
 
             if(Math.abs(tx) < 100 && gamepad2.right_stick_x != 0){
-                turretAnchor = turretMotor.getCurrentPosition() - heading;
+                turretAnchor = turretMotor.getCurrentPosition();
             }
 
             if(gamepad2.a){
-                turretAnchor = turretMotor.getCurrentPosition() - heading;
-                lllocalize += error + tx;
+                turretAnchor = turretMotor.getCurrentPosition();
+                lllocalize = 0;
             }
         }
 
-
-
+        if(Math.abs(error) < 20 && adjusted == false && tx != 0){
+            headingNormShiftVal = turretMotor.getCurrentPosition();
+            adjusted = true;
+            turretAnchor = 0;
+        }
 
         if(gamepad2.b){
-            targetPos = heading*800/3.14159 + turretAnchor + lllocalize;
+            targetPos = headingNorm + turretAnchor + 0*lllocalize + zeroAdjust;
         } else {
-            targetPos = 0;
+            targetPos = 0 + zeroAdjust;
         }
+        targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
 
         error = turretMotor.getCurrentPosition() - targetPos;
         i = i + error;
@@ -185,12 +211,12 @@ public class BensAmazingTest extends OpMode{
         PID = error * 1 + i * 0.05 + d * 0.05;
         PID = PID*0.005;
 
-        if(PID > 0.6){
-            PID = 0.6;
+        if(PID > 0.5){
+            PID = 0.5;
         }
 
-        if(PID < -0.6){
-            PID = -0.6;
+        if(PID < -0.5){
+            PID = -0.5;
         }
 
         if(Math.abs(error) < 80){
@@ -203,16 +229,22 @@ public class BensAmazingTest extends OpMode{
             }
         }
 
+
+
         if(Math.abs(error) < 1){
             PID = 0;
         }
 
         if(gamepad2.right_stick_x != 0){
-            PID = gamepad2.right_stick_x*0.5;
+            PID = -gamepad2.right_stick_x*0.5;
         }
 
 
         turretMotor.setPower(-PID);
+
+//        if(turretMotor.getCurrentPosition() < -750 && PID > 0){
+//            turretMotor.setPower(0);
+//        }
         //----------------------Flywheel------------------------
         distance = 2000;
 
@@ -224,11 +256,13 @@ public class BensAmazingTest extends OpMode{
 
         //--------------------Telemetry-------------------------
 
-        telemetry.addData("heading", heading*800/3.14159);
-        telemetry.addData("x", x);
-        //telemetry.addData("status", autoFlywheel);
+        telemetry.addData("heading", headingNorm);
+        telemetry.addData("headingshift", headingNormShift);
+        telemetry.addData("shiftval", headingNormShiftVal);
+        telemetry.addData("adj", adjusted);
         telemetry.addData("tx", tx);
         telemetry.addData("error", error);
+        telemetry.addData("lllocalize", lllocalize);
         telemetry.addData("turret Power", turretMotor.getPower());
         telemetry.addData("targpos", targetPos);
         telemetry.addData("anchor", turretAnchor);
