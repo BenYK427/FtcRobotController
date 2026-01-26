@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -33,7 +34,7 @@ public class BensAmazingTest extends OpMode{
     double intakePower;
 
     Flywheel flywheel = new Flywheel();
-    double distance = 1800;
+    double targVel = 0;
     boolean autoFlywheel;
 
     //Turret turret = new Turret();
@@ -45,6 +46,8 @@ public class BensAmazingTest extends OpMode{
     private Limelight3A limelight;
 
     double tx;
+
+    private Servo triggerServo;
 
 
     private DcMotor turretMotor;
@@ -63,6 +66,9 @@ public class BensAmazingTest extends OpMode{
     boolean adjustedTur = false;
 
 
+    double intakePowerShoot = 0;
+
+
     public void init(){
         drive.init(hardwareMap);
         intake.init(hardwareMap);
@@ -75,6 +81,8 @@ public class BensAmazingTest extends OpMode{
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        triggerServo = hardwareMap.get(Servo.class, "triggerServo");
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
@@ -149,16 +157,27 @@ public class BensAmazingTest extends OpMode{
 
         drive.drive(forward, strafe, turn, adjust, headingDrive);
 
+        //-----------------------Shooting-----------------------
+        if(gamepad2.y){
+            triggerServo.setPosition(0.3);
+        } else {
+            triggerServo.setPosition(0);
+        }
+
+
+
+        if(triggerServo.getPosition() > 0.25 && gamepad2.left_stick_y == 0){
+            intakePowerShoot = -0.3;
+        } else {
+            intakePowerShoot = 0;
+        }
 
         //-----------------------Intake-------------------------
-        intakePower = gamepad2.left_stick_y;
+        intakePower = gamepad2.left_stick_y + intakePowerShoot;
 
         intake.intake(intakePower);
 
         //-----------------------Turret-------------------------
-
-
-
         if(gamepad2.dpadUpWasPressed()){
             zeroAdjust += 10;
         }
@@ -168,7 +187,7 @@ public class BensAmazingTest extends OpMode{
 
         if(tx != 0){
 
-            if(Math.abs(error + tx ) > 30 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500){
+            if(Math.abs(error + tx ) > 30 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500 && autoFlywheel == true){
                 lllocalize += error + tx;
             }
 
@@ -189,12 +208,12 @@ public class BensAmazingTest extends OpMode{
             turretAnchor = 0;
         }
 
-//        if(gamepad2.b){
-//            targetPos = headingNorm + turretAnchor + 0*lllocalize + zeroAdjust;
-//        } else {
-//            targetPos = 0 + zeroAdjust;
-//        }
-        targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
+        if(autoFlywheel){
+            targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
+        } else {
+            targetPos = 0 + zeroAdjust;
+        }
+        //targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
 
         error = turretMotor.getCurrentPosition() - targetPos;
         i = i + error;
@@ -242,20 +261,15 @@ public class BensAmazingTest extends OpMode{
 //        if(turretMotor.getCurrentPosition() < -750 && PID > 0){
 //            turretMotor.setPower(0);
 //        }
-        //----------------------Flywheel------------------------
-        if(gamepad1.dpadUpWasPressed()){
-            distance += 10;
-        }
 
-        if(gamepad1.dpadDownWasPressed()){
-            distance -= 10;
-        }
+        //----------------------Flywheel------------------------
+        targVel = llResult.getTa()*-1195.3 +2230;
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
         }
 
-        flywheel.flywheel(distance, autoFlywheel);
+        flywheel.flywheel(targVel, autoFlywheel);
 
         //--------------------Telemetry-------------------------
 
@@ -263,7 +277,7 @@ public class BensAmazingTest extends OpMode{
         telemetry.addData("headingshift", headingNormShift);
         telemetry.addData("shiftval", headingNormShiftVal);
         telemetry.addData("adj", adjustedTur);
-        telemetry.addData("distance", distance);
+        telemetry.addData("distance", triggerServo.getPosition());
         telemetry.addData("tx", tx);
         telemetry.addData("ta", llResult.getTa());
         telemetry.addData("error", error);

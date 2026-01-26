@@ -30,11 +30,11 @@ public class Flywheel {
         motorFlywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
-    public void flywheel(double distance, boolean autoFlywheel){
+    public void flywheel(double targVel, boolean autoFlywheel){
 
 
         if(autoFlywheel){
-            motorFlywheel.setVelocity(distance);
+            motorFlywheel.setVelocity(targVel);
             motorFlywheel2.setPower(motorFlywheel.getPower());
         } else {
             motorFlywheel.setPower(0);
