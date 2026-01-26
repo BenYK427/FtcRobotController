@@ -7,11 +7,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 
 public class Flywheel {
 
     private DcMotorEx motorFlywheel;
     private DcMotor motorFlywheel2;
+
+    public double flyWheelVel;
 
 
     public void init(HardwareMap hwMap) {
@@ -31,7 +35,7 @@ public class Flywheel {
     }
 
     public void flywheel(double targVel, boolean autoFlywheel){
-
+        flyWheelVel = motorFlywheel.getVelocity();
 
         if(autoFlywheel){
             motorFlywheel.setVelocity(targVel);

@@ -167,7 +167,7 @@ public class BensAmazingTest extends OpMode{
 
 
         if(triggerServo.getPosition() > 0.25 && gamepad2.left_stick_y == 0){
-            intakePowerShoot = -0.3;
+            intakePowerShoot = -1;
         } else {
             intakePowerShoot = 0;
         }
@@ -268,6 +268,8 @@ public class BensAmazingTest extends OpMode{
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
         }
+
+
 
         flywheel.flywheel(targVel, autoFlywheel);
 

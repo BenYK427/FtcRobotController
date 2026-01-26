@@ -21,7 +21,7 @@ public class MechanumDrive {
         LeftFront = hwMap.get(DcMotor.class, "LeftFront");
         LeftBack = hwMap.get(DcMotor.class, "LeftBack");
 
-        RightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        RightFront.setDirection(DcMotorSimple.Direction.FORWARD);
         RightBack.setDirection(DcMotorSimple.Direction.FORWARD);
         LeftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         LeftBack.setDirection(DcMotorSimple.Direction.FORWARD);
