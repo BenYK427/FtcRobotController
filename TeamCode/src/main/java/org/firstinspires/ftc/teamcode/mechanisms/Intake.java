@@ -15,6 +15,6 @@ public class Intake {
 
     public void intake(double intakePower) {
 
-        intakeMotor.setPower(-intakePower);
+        intakeMotor.setPower(-intakePower*0.7);
     }
 }

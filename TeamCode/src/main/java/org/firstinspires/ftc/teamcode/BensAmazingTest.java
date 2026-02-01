@@ -34,7 +34,7 @@ public class BensAmazingTest extends OpMode{
     double intakePower;
 
     Flywheel flywheel = new Flywheel();
-    double targVel = 0;
+    double targVel = 1800;
     boolean autoFlywheel;
 
     //Turret turret = new Turret();
@@ -48,8 +48,7 @@ public class BensAmazingTest extends OpMode{
     double tx;
 
     private Servo triggerServo;
-
-
+    private Servo pushServo;
     private DcMotor turretMotor;
     double i;
     double d;
@@ -83,6 +82,7 @@ public class BensAmazingTest extends OpMode{
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         triggerServo = hardwareMap.get(Servo.class, "triggerServo");
+        pushServo = hardwareMap.get(Servo.class, "pushServo");
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
@@ -120,7 +120,6 @@ public class BensAmazingTest extends OpMode{
         tx = llResult.getTx()*5.4166667;
 
 
-
         if(headingNormShiftVal > 0) {
             if (headingNorm + headingNormShiftVal > 800) {
                 headingNormShift = headingNorm - (1600 - headingNormShiftVal);
@@ -143,6 +142,12 @@ public class BensAmazingTest extends OpMode{
 
 
         //---------------------------Drive------------------------------
+        if(gamepad2.x) {
+            pushServo.setPosition(0.35);
+        }else{
+            pushServo.setPosition(0);
+        }
+
         if(gamepad1.b){
             adjust = true;
         } else {
@@ -187,22 +192,23 @@ public class BensAmazingTest extends OpMode{
 
         if(tx != 0){
 
-            if(Math.abs(error + tx ) > 30 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500 && autoFlywheel == true){
+            if(Math.abs(error + tx ) > 10 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500 && autoFlywheel == true){
                 lllocalize += error + tx;
-            }
-
-
-            if(Math.abs(tx) < 100 && gamepad2.right_stick_x != 0){
-                turretAnchor = turretMotor.getCurrentPosition();
-            }
-
-            if(gamepad2.a){
-                turretAnchor = turretMotor.getCurrentPosition();
-                lllocalize = 0;
             }
         }
 
-        if(Math.abs(error) < 20 && adjustedTur == false && tx != 0){
+//        if(gamepad2.a){
+//            turretAnchor = turretMotor.getCurrentPosition();
+//            lllocalize = 0;
+//        }
+
+//        if(Math.abs(error) < 20 && adjustedTur == false && tx != 0){
+//            headingNormShiftVal = turretMotor.getCurrentPosition();
+//            adjustedTur = true;
+//            turretAnchor = 0;
+//        }
+
+        if(gamepad2.aWasPressed()){
             headingNormShiftVal = turretMotor.getCurrentPosition();
             adjustedTur = true;
             turretAnchor = 0;
@@ -262,8 +268,21 @@ public class BensAmazingTest extends OpMode{
 //            turretMotor.setPower(0);
 //        }
 
-        //----------------------Flywheel------------------------
-        targVel = llResult.getTa()*-1195.3 +2230;
+//        //----------------------Flywheel------------------------
+//        if(gamepad2.dpadRightWasPressed()){
+//            targVel += 5;
+//        }
+//        if(gamepad2.dpadLeftWasPressed()){
+//            targVel -= 5;
+//        }
+
+        if(llResult.getTa() > 0.5){
+            targVel = 1630;
+        } else {
+            targVel = -1560.329*llResult.getTa() +2300.488;
+        }
+
+        //+60
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
@@ -279,7 +298,7 @@ public class BensAmazingTest extends OpMode{
         telemetry.addData("headingshift", headingNormShift);
         telemetry.addData("shiftval", headingNormShiftVal);
         telemetry.addData("adj", adjustedTur);
-        telemetry.addData("distance", triggerServo.getPosition());
+        telemetry.addData("targVel", targVel);
         telemetry.addData("tx", tx);
         telemetry.addData("ta", llResult.getTa());
         telemetry.addData("error", error);
