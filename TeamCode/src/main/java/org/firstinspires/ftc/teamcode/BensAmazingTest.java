@@ -192,7 +192,7 @@ public class BensAmazingTest extends OpMode{
 
         if(tx != 0){
 
-            if(Math.abs(error + tx ) > 10 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500 && autoFlywheel == true){
+            if(Math.abs(error + tx ) > 5 && targetPos != 0 && gamepad2.right_stick_x == 0 &&  Math.abs(error + tx) < 500){
                 lllocalize += error + tx;
             }
         }
@@ -209,17 +209,17 @@ public class BensAmazingTest extends OpMode{
 //        }
 
         if(gamepad2.aWasPressed()){
-            headingNormShiftVal = turretMotor.getCurrentPosition();
+            headingNormShiftVal = turretMotor.getCurrentPosition() - 100;
             adjustedTur = true;
             turretAnchor = 0;
         }
 
-        if(autoFlywheel){
-            targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
-        } else {
-            targetPos = 0 + zeroAdjust;
-        }
-        //targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
+//        if(autoFlywheel){
+//            targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
+//        } else {
+//            targetPos = 0 + zeroAdjust;
+//        }
+        targetPos = headingNormShift + turretAnchor + lllocalize + zeroAdjust;
 
         error = turretMotor.getCurrentPosition() - targetPos;
         i = i + error;
@@ -264,10 +264,6 @@ public class BensAmazingTest extends OpMode{
 
         turretMotor.setPower(-PID);
 
-//        if(turretMotor.getCurrentPosition() < -750 && PID > 0){
-//            turretMotor.setPower(0);
-//        }
-
 //        //----------------------Flywheel------------------------
 //        if(gamepad2.dpadRightWasPressed()){
 //            targVel += 5;
@@ -279,10 +275,10 @@ public class BensAmazingTest extends OpMode{
         if(llResult.getTa() > 0.5){
             targVel = 1630;
         } else {
-            targVel = -1560.329*llResult.getTa() +2300.488;
+            targVel = -1560.329*llResult.getTa() +2240.488;
         }
 
-        //+60
+        //+0
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
