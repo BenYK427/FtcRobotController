@@ -180,6 +180,10 @@ public class BensAmazingTest extends OpMode{
         //-----------------------Intake-------------------------
         intakePower = gamepad2.left_stick_y + intakePowerShoot;
 
+        if(llResult.getTa() < 0.5 && autoFlywheel == true){
+            intakePower = intakePower*0.7;
+        }
+
         intake.intake(intakePower);
 
         //-----------------------Turret-------------------------
@@ -293,7 +297,7 @@ public class BensAmazingTest extends OpMode{
         telemetry.addData("heading", headingNorm);
         telemetry.addData("headingshift", headingNormShift);
         telemetry.addData("shiftval", headingNormShiftVal);
-        telemetry.addData("adj", adjustedTur);
+        telemetry.addData("intake", intakePower);
         telemetry.addData("targVel", targVel);
         telemetry.addData("tx", tx);
         telemetry.addData("ta", llResult.getTa());
