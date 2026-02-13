@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.util.Log;
-
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -21,10 +17,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit
 import org.firstinspires.ftc.teamcode.mechanisms.Flywheel;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MechanumDrive;
-import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 
 @TeleOp
-public class BensAmazingTest extends OpMode{
+public class A__BLUE__BensAmazingTest extends OpMode{
 
     MechanumDrive drive = new MechanumDrive();
     double forward, strafe, turn, headingDrive;
@@ -279,10 +274,10 @@ public class BensAmazingTest extends OpMode{
         if(llResult.getTa() > 0.5){
             targVel = 1630;
         } else {
-            targVel = -1560.329*llResult.getTa() +2240.488;
+            targVel = -1560.329*llResult.getTa() +2220.488;
         }
 
-        //+0
+        //-20
 
         if(gamepad2.rightBumperWasPressed()){
             autoFlywheel = !autoFlywheel;
